@@ -1,0 +1,78 @@
+@model IEnumerable<FisherMan.ASP.Models.Domain.FishingPermit>
+
+@{
+    ViewData["Title"] = "Разрешителни за риболов";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>@ViewData["Title"]</h2>
+    <a asp-action="Create" class="btn btn-success">+ Добавяне</a>
+</div>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="search" value="@ViewData["Search"]" class="form-control" placeholder="Търсене по собственик, маркировка, капитан..." />
+        <button type="submit" class="btn btn-primary">Търси</button>
+        @if (!string.IsNullOrEmpty(ViewData["Search"]?.ToString()))
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary">Изчисти</a>
+        }
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Кораб (маркировка)</th>
+                <th>Собственик</th>
+                <th>Капитан</th>
+                <th>Издадено</th>
+                <th>Изтича</th>
+                <th>Уреди</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><strong>@item.Ship?.Marking</strong></td>
+                    <td>@item.Ship?.OwnerName</td>
+                    <td>@item.CaptainName</td>
+                    <td>@item.IssueDate.ToString("dd.MM.yyyy")</td>
+                    <td>@item.ExpiryDate.ToString("dd.MM.yyyy")</td>
+                    <td>@item.FishingTools</td>
+                    <td>
+                        @if (item.IsRevoked)
+                        {
+                            <span class="badge bg-danger">Отнето</span>
+                        }
+                        else if (item.ExpiryDate < DateTime.Today)
+                        {
+                            <span class="badge bg-warning text-dark">Изтекло</span>
+                        }
+                        else if ((item.ExpiryDate - DateTime.Today).TotalDays <= 30)
+                        {
+                            <span class="badge bg-orange" style="background-color:#fd7e14;color:white">Изтича скоро</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Активно</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Детайли</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редакция</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Изтриване</a>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="8" class="text-center text-muted">Няма намерени разрешителни.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

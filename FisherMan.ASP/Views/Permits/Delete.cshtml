@@ -1,0 +1,29 @@
+@model FisherMan.ASP.Models.Domain.FishingPermit
+
+@{
+    ViewData["Title"] = "Изтриване на разрешително";
+}
+
+<h2 class="text-danger">@ViewData["Title"]</h2>
+<p>Сигурни ли сте, че искате да изтриете следното разрешително?</p>
+
+<div class="card col-md-6 mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-4">Кораб</dt>
+            <dd class="col-sm-8">@Model.Ship?.Marking (@Model.Ship?.OwnerName)</dd>
+            <dt class="col-sm-4">Капитан</dt>
+            <dd class="col-sm-8">@Model.CaptainName</dd>
+            <dt class="col-sm-4">Издадено</dt>
+            <dd class="col-sm-8">@Model.IssueDate.ToString("dd.MM.yyyy")</dd>
+            <dt class="col-sm-4">Изтича</dt>
+            <dd class="col-sm-8">@Model.ExpiryDate.ToString("dd.MM.yyyy")</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="submit" value="Изтриване" class="btn btn-danger" />
+    <a asp-action="Index" class="btn btn-secondary">Отказ</a>
+</form>
