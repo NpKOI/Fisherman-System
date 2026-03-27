@@ -1,0 +1,27 @@
+@model FisherMan.ASP.Models.Domain.Inspection
+
+@{
+    ViewData["Title"] = "Изтриване на инспекция";
+}
+
+<h2 class="text-danger">@ViewData["Title"]</h2>
+<p>Сигурни ли сте, че искате да изтриете тази инспекция?</p>
+
+<div class="card col-md-5 mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-4">Инспектор</dt>
+            <dd class="col-sm-8">@Model.Inspector?.Name</dd>
+            <dt class="col-sm-4">Дата</dt>
+            <dd class="col-sm-8">@Model.InspectionDate.ToString("dd.MM.yyyy")</dd>
+            <dt class="col-sm-4">Обект</dt>
+            <dd class="col-sm-8">@Model.InspectedObject</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="submit" value="Изтриване" class="btn btn-danger" />
+    <a asp-action="Index" class="btn btn-secondary">Отказ</a>
+</form>

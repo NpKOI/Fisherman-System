@@ -1,0 +1,67 @@
+@model FisherMan.ASP.Models.Domain.FishingTrip
+
+@{
+    ViewData["Title"] = "Детайли за риболовен излет";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">Данни за излета</div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Кораб</dt>
+                    <dd class="col-sm-7">@Model.Permit?.Ship?.Marking</dd>
+                    <dt class="col-sm-5">Собственик</dt>
+                    <dd class="col-sm-7">@Model.Permit?.Ship?.OwnerName</dd>
+                    <dt class="col-sm-5">Капитан</dt>
+                    <dd class="col-sm-7">@Model.Permit?.CaptainName</dd>
+                    <dt class="col-sm-5">Начало</dt>
+                    <dd class="col-sm-7">@Model.StartDate.ToString("dd.MM.yyyy HH:mm")</dd>
+                    <dt class="col-sm-5">Край</dt>
+                    <dd class="col-sm-7">@(Model.EndDate?.ToString("dd.MM.yyyy HH:mm") ?? "В процес")</dd>
+                    <dt class="col-sm-5">Продължителност</dt>
+                    <dd class="col-sm-7">@(Model.DurationHours.HasValue ? $"{Model.DurationHours.Value:F1} часа" : "-")</dd>
+                    <dt class="col-sm-5">Локация</dt>
+                    <dd class="col-sm-7">@Model.StartLocation</dd>
+                    <dt class="col-sm-5">Уреди</dt>
+                    <dd class="col-sm-7">@Model.FishingTools</dd>
+                    <dt class="col-sm-5">Общ улов</dt>
+                    <dd class="col-sm-7"><strong>@Model.TotalCatchKg.ToString("F1") кг</strong></dd>
+                    <dt class="col-sm-5">Изразходено гориво</dt>
+                    <dd class="col-sm-7">@(Model.FuelConsumed.HasValue ? $"{Model.FuelConsumed.Value:F1} л" : "-")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Улов по видове (@Model.Catches.Count)</h4>
+<table class="table table-sm table-bordered">
+    <thead class="table-light">
+        <tr>
+            <th>Вид риба</th>
+            <th>Тегло (кг)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model.Catches.OrderByDescending(c => c.WeightKg))
+        {
+            <tr>
+                <td>@c.FishType</td>
+                <td>@c.WeightKg.ToString("F2")</td>
+            </tr>
+        }
+        @if (!Model.Catches.Any())
+        {
+            <tr><td colspan="2" class="text-center text-muted">Няма записи за улов по видове.</td></tr>
+        }
+    </tbody>
+</table>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Редакция</a>
+    <a asp-action="Index" class="btn btn-secondary">Обратно</a>
+</div>

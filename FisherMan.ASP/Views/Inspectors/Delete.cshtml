@@ -1,0 +1,14 @@
+@model FisherMan.ASP.Models.Domain.Inspector
+
+@{
+    ViewData["Title"] = "Изтриване на инспектор";
+}
+
+<h2 class="text-danger">@ViewData["Title"]</h2>
+<p>Сигурни ли сте, че искате да изтриете инспектор <strong>@Model.Name</strong>?</p>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="submit" value="Изтриване" class="btn btn-danger" />
+    <a asp-action="Index" class="btn btn-secondary">Отказ</a>
+</form>

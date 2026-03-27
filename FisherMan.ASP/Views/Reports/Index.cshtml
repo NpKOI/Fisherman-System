@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Справки и анализи";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p class="text-muted mb-4">Изберете желаната справка от списъка по-долу.</p>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Справка 1</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">Кораби с изтичащо разрешително</h6>
+                <p class="card-text text-muted">Списък на корабите с разрешение, което изтича в следващите 30 дни.</p>
+                <a asp-action="Report1" class="btn btn-warning">Виж справката</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100 border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Справка 2</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">Класация на любителите рибари</h6>
+                <p class="card-text text-muted">Рибари любители с най-голям улов за последната една година и сумата в кг.</p>
+                <a asp-action="Report2" class="btn btn-info">Виж справката</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Справка 3</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">Класация на риболовните кораби</h6>
+                <p class="card-text text-muted">Средна/мин/макс продължителност и количество улов на излет, брой излети и общ улов за текущата година.</p>
+                <a asp-action="Report3" class="btn btn-primary">Виж справката</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Справка 4</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">Въглероден отпечатък</h6>
+                <p class="card-text text-muted">Изчисление на въглеродния отпечатък (л гориво / кг риба) за всеки кораб с активно разрешително за текущата година.</p>
+                <a asp-action="Report4" class="btn btn-success">Виж справката</a>
+            </div>
+        </div>
+    </div>
+</div>

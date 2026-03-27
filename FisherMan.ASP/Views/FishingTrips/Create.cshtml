@@ -1,0 +1,64 @@
+@model FisherMan.ASP.Models.Domain.FishingTrip
+
+@{
+    ViewData["Title"] = "Добавяне на риболовен излет";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-7">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="PermitId" class="form-label"></label>
+                <select asp-for="PermitId" class="form-select" asp-items="ViewBag.PermitId">
+                    <option value="">-- Изберете разрешително --</option>
+                </select>
+                <span asp-validation-for="PermitId" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StartDate" class="form-label"></label>
+                    <input asp-for="StartDate" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="EndDate" class="form-label"></label>
+                    <input asp-for="EndDate" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="StartLocation" class="form-label"></label>
+                <input asp-for="StartLocation" class="form-control" />
+                <span asp-validation-for="StartLocation" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="FishingTools" class="form-label"></label>
+                <textarea asp-for="FishingTools" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="FishingTools" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="TotalCatchKg" class="form-label"></label>
+                    <input asp-for="TotalCatchKg" class="form-control" />
+                    <span asp-validation-for="TotalCatchKg" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="FuelConsumed" class="form-label"></label>
+                    <input asp-for="FuelConsumed" class="form-control" />
+                    <span asp-validation-for="FuelConsumed" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mt-3">
+                <input type="submit" value="Добавяне" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Отказ</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
