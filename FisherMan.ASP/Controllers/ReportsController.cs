@@ -4,174 +4,195 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FisherMan.ASP.Controllers
 {
-    [ApiController]
-    [Route("api/reports")]
-    public class ReportsController : ControllerBase
+    public class ReportsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly FishermanContext _context;
 
-        public ReportsController(ApplicationDbContext context)
+        public ReportsController(FishermanContext context)
         {
             _context = context;
         }
 
-        [HttpGet("ships-expiring-permits")]
-        public async Task<IActionResult> GetShipsWithExpiringPermits()
+        // Reports Dashboard
+        public IActionResult Index()
         {
-            var report = await _context.Database.SqlQueryRaw<ExpiringPermitReportRow>(@"
-                SELECT s.Id AS ShipId,
-                       s.InternationalNumber,
-                       s.CallSign,
-                       s.Marking,
-                       p.ValidUntil AS PermitValidUntil
-                FROM Ships s
-                INNER JOIN Permits p ON p.ShipId = s.Id
-                WHERE p.IsRevoked = 0
-                  AND p.ValidUntil >= CAST(GETDATE() AS date)
-                  AND p.ValidUntil < DATEADD(MONTH, 1, CAST(GETDATE() AS date))
-                ORDER BY p.ValidUntil, s.InternationalNumber")
+            return View();
+        }
+
+        // Report 1: Expiring Permits (next 1 month)
+        public async Task<IActionResult> ExpiringPermits()
+        {
+            var today = DateTime.Today;
+            var nextMonth = today.AddMonths(1);
+
+            var results = await _context.Permits
+                .Include(p => p.Vessel).ThenInclude(v => v!.Owner)
+                .Include(p => p.Person)
+                .Where(p => !p.IsRevoked && p.ExpiryDate >= today && p.ExpiryDate <= nextMonth)
+                .Select(p => new ExpiringPermitViewModel
+                {
+                    VesselName = p.Vessel!.Marking,
+                    InternationalNumber = p.Vessel.InternationalNumber,
+                    OwnerName = p.Person != null ? p.Person.FullName : (p.Vessel.Owner != null ? p.Vessel.Owner.FullName : "Unknown"),
+                    ExpiryDate = p.ExpiryDate,
+                    DaysUntilExpiry = (p.ExpiryDate - today).Days
+                })
+                .OrderBy(x => x.DaysUntilExpiry)
                 .ToListAsync();
 
-            return Ok(report);
+            return View(results);
         }
 
-        [HttpGet("amateur-catch-ranking")]
-        public async Task<IActionResult> GetAmateurCatchRanking()
+        // Report 2: Top Amateur Fishermen (last 1 year)
+        public async Task<IActionResult> TopAmateurs()
         {
-            var report = await _context.Database.SqlQueryRaw<AmateurCatchRankingRow>(@"
-                SELECT ac.AmateurId,
-                       CONCAT(u.FirstName, ' ', u.LastName) AS FullName,
-                       SUM(ac.QuantityKg) AS TotalCatchKg
-                FROM AmateurCatches ac
-                INNER JOIN ApplicationUsers u ON u.Id = ac.AmateurId
-                WHERE ac.DateCaught >= DATEADD(YEAR, -1, CAST(GETDATE() AS date))
-                GROUP BY ac.AmateurId, u.FirstName, u.LastName
-                ORDER BY SUM(ac.QuantityKg) DESC")
+            var oneYearAgo = DateTime.Today.AddYears(-1);
+
+            // Load into memory first to avoid SQLite decimal Sum issue
+            var catches = await _context.AmateurCatches
+                .Include(c => c.AmateurTicket)
+                .Where(c => c.CatchDate >= oneYearAgo)
                 .ToListAsync();
 
-            return Ok(report);
+            var results = catches
+                .GroupBy(c => new { c.AmateurTicketId, c.AmateurTicket!.FishermanName })
+                .Select(g => new TopAmateurViewModel
+                {
+                    FishermanName = g.Key.FishermanName,
+                    TicketNumber = g.Key.AmateurTicketId.ToString(),
+                    TotalCatchKg = g.Sum(x => x.QuantityKg),
+                    TripCount = g.Count()
+                })
+                .OrderByDescending(x => x.TotalCatchKg)
+                .ToList();
+
+            // Add ranking
+            for (int i = 0; i < results.Count; i++)
+            {
+                results[i].Rank = i + 1;
+            }
+
+            return View(results);
         }
 
-        [HttpGet("ship-trip-statistics")]
-        public async Task<IActionResult> GetShipTripStatistics([FromQuery] int? year)
+        // Report 3: Vessel Statistics
+        public async Task<IActionResult> VesselStatistics()
         {
-            var targetYear = year ?? DateTime.UtcNow.Year;
+            var startOfYear = new DateTime(DateTime.Today.Year, 1, 1);
 
-            var report = await _context.Database.SqlQueryRaw<ShipTripStatisticsRow>($@"
-                SELECT s.Id AS ShipId,
-                       s.InternationalNumber,
-                       AVG(ft.DurationInHours) AS AvgTripHours,
-                       MIN(ft.DurationInHours) AS MinTripHours,
-                       MAX(ft.DurationInHours) AS MaxTripHours,
-                       AVG(tripTotals.TripCatchKg) AS AvgCatchKgPerTrip,
-                       MIN(tripTotals.TripCatchKg) AS MinCatchKgPerTrip,
-                       MAX(tripTotals.TripCatchKg) AS MaxCatchKgPerTrip,
-                       COUNT(DISTINCT ft.Id) AS TripsCount,
-                       SUM(tripTotals.TripCatchKg) AS TotalCatchKg
-                FROM Ships s
-                INNER JOIN FishingTrips ft ON ft.ShipId = s.Id
-                INNER JOIN (
-                    SELECT cc.FishingTripId,
-                           SUM(cc.QuantityKg) AS TripCatchKg
-                    FROM CommercialCatches cc
-                    GROUP BY cc.FishingTripId
-                ) tripTotals ON tripTotals.FishingTripId = ft.Id
-                WHERE YEAR(ft.StartTime) = {targetYear}
-                GROUP BY s.Id, s.InternationalNumber
-                ORDER BY TotalCatchKg DESC")
+            // Load into memory first to avoid SQLite decimal aggregation issues
+            var entries = await _context.LogbookEntries
+                .Include(l => l.Vessel)
+                .Where(l => l.StartTime >= startOfYear)
                 .ToListAsync();
 
-            return Ok(report);
+            var results = entries
+                .GroupBy(l => new { l.VesselId, l.Vessel!.Marking, l.Vessel.InternationalNumber })
+                .Select(g => new VesselStatisticsViewModel
+                {
+                    VesselName = g.Key.Marking,
+                    InternationalNumber = g.Key.InternationalNumber,
+                    AvgDuration = g.Average(x => x.DurationHours),
+                    MinDuration = g.Min(x => x.DurationHours),
+                    MaxDuration = g.Max(x => x.DurationHours),
+                    AvgCatch = g.Average(x => x.CatchQuantityKg),
+                    MinCatch = g.Min(x => x.CatchQuantityKg),
+                    MaxCatch = g.Max(x => x.CatchQuantityKg),
+                    TotalTrips = g.Count(),
+                    TotalCatchKg = g.Sum(x => x.CatchQuantityKg)
+                })
+                .OrderByDescending(x => x.TotalCatchKg)
+                .ToList();
+
+            return View(results);
         }
 
-        [HttpGet("carbon-footprint")]
-        public async Task<IActionResult> GetCarbonFootprint([FromQuery] int? year)
+        // Report 4: Carbon Footprint
+        public async Task<IActionResult> CarbonFootprint()
         {
-            var targetYear = year ?? DateTime.UtcNow.Year;
+            var today = DateTime.Today;
+            var startOfYear = new DateTime(today.Year, 1, 1);
 
-            var report = await _context.Database.SqlQueryRaw<CarbonFootprintRow>($@"
-                WITH ValidShips AS (
-                    SELECT DISTINCT p.ShipId
-                    FROM Permits p
-                    WHERE p.IsRevoked = 0
-                      AND p.ValidUntil >= CAST(GETDATE() AS date)
-                ),
-                TripStats AS (
-                    SELECT ft.ShipId,
-                           SUM(ft.DurationInHours) AS TotalHours
-                    FROM FishingTrips ft
-                    WHERE YEAR(ft.StartTime) = {targetYear}
-                    GROUP BY ft.ShipId
-                ),
-                CatchStats AS (
-                    SELECT ft.ShipId,
-                           SUM(cc.QuantityKg) AS TotalCatchKg
-                    FROM FishingTrips ft
-                    INNER JOIN CommercialCatches cc ON cc.FishingTripId = ft.Id
-                    WHERE YEAR(ft.StartTime) = {targetYear}
-                    GROUP BY ft.ShipId
-                )
-                SELECT s.Id AS ShipId,
-                       s.InternationalNumber,
-                       e.FuelType,
-                       ts.TotalHours,
-                       e.AverageFuelConsumptionPerHour,
-                       cs.TotalCatchKg,
-                       CASE
-                           WHEN cs.TotalCatchKg IS NULL OR cs.TotalCatchKg = 0 THEN NULL
-                           ELSE (ts.TotalHours * e.AverageFuelConsumptionPerHour) / cs.TotalCatchKg
-                       END AS FuelPerKgCatch
-                FROM Ships s
-                INNER JOIN ValidShips vs ON vs.ShipId = s.Id
-                INNER JOIN Engines e ON e.Id = s.EngineId
-                LEFT JOIN TripStats ts ON ts.ShipId = s.Id
-                LEFT JOIN CatchStats cs ON cs.ShipId = s.Id
-                WHERE cs.TotalCatchKg IS NOT NULL AND cs.TotalCatchKg > 0
-                ORDER BY FuelPerKgCatch")
+            // Get vessels with valid (non-expired) permits
+            var vesselsWithValidPermits = await _context.Permits
+                .Where(p => !p.IsRevoked && p.ExpiryDate >= today)
+                .Select(p => p.VesselId)
+                .Distinct()
                 .ToListAsync();
 
-            return Ok(report);
+            // Load into memory first to avoid SQLite decimal aggregation issues
+            var entries = await _context.LogbookEntries
+                .Include(l => l.Vessel)
+                .Where(l => l.StartTime >= startOfYear && vesselsWithValidPermits.Contains(l.VesselId))
+                .ToListAsync();
+
+            var results = entries
+                .GroupBy(l => new {
+                    l.VesselId,
+                    l.Vessel!.Marking,
+                    l.Vessel.InternationalNumber,
+                    l.Vessel.AvgFuelConsumption
+                })
+                .Select(g => new
+                {
+                    VesselName = g.Key.Marking,
+                    InternationalNumber = g.Key.InternationalNumber,
+                    AvgFuelConsumption = g.Key.AvgFuelConsumption,
+                    TotalHours = g.Sum(x => x.DurationHours),
+                    TotalCatchKg = g.Sum(x => x.CatchQuantityKg)
+                })
+                .ToList();
+
+            var carbonResults = results
+                .Where(r => r.TotalCatchKg > 0)
+                .Select(r => {
+                    var totalFuel = r.AvgFuelConsumption * r.TotalHours;
+                    var carbonPerKg = totalFuel / r.TotalCatchKg;
+                    return new CarbonFootprintViewModel
+                    {
+                        VesselName = r.VesselName,
+                        InternationalNumber = r.InternationalNumber,
+                        TotalFuelConsumed = totalFuel,
+                        TotalCatchKg = r.TotalCatchKg,
+                        CarbonPerKg = carbonPerKg,
+                        EfficiencyRating = carbonPerKg switch
+                        {
+                            < 1 => "Excellent",
+                            < 2 => "Good",
+                            < 3 => "Average",
+                            _ => "Poor"
+                        }
+                    };
+                })
+                .OrderBy(x => x.CarbonPerKg)
+                .ToList();
+
+            return View(carbonResults);
         }
 
-        public sealed class ExpiringPermitReportRow
+        // Extra Feature: Quick TELK Search for Inspectors
+        [HttpGet]
+        public async Task<IActionResult> SearchTelk(string telkNumber)
         {
-            public int ShipId { get; set; }
-            public string InternationalNumber { get; set; } = string.Empty;
-            public string CallSign { get; set; } = string.Empty;
-            public string Marking { get; set; } = string.Empty;
-            public DateTime PermitValidUntil { get; set; }
-        }
+            if (string.IsNullOrEmpty(telkNumber))
+                return Json(new { found = false });
 
-        public sealed class AmateurCatchRankingRow
-        {
-            public int AmateurId { get; set; }
-            public string FullName { get; set; } = string.Empty;
-            public decimal TotalCatchKg { get; set; }
-        }
+            var ticket = await _context.AmateurTickets
+                .Where(t => t.TelkDecisionNumber != null && t.TelkDecisionNumber.Contains(telkNumber))
+                .Select(t => new
+                {
+                    t.FishermanName,
+                    t.TelkDecisionNumber,
+                    t.ValidFrom,
+                    t.ValidUntil,
+                    IsValid = t.ValidUntil >= DateTime.Today
+                })
+                .FirstOrDefaultAsync();
 
-        public sealed class ShipTripStatisticsRow
-        {
-            public int ShipId { get; set; }
-            public string InternationalNumber { get; set; } = string.Empty;
-            public decimal AvgTripHours { get; set; }
-            public decimal MinTripHours { get; set; }
-            public decimal MaxTripHours { get; set; }
-            public decimal AvgCatchKgPerTrip { get; set; }
-            public decimal MinCatchKgPerTrip { get; set; }
-            public decimal MaxCatchKgPerTrip { get; set; }
-            public int TripsCount { get; set; }
-            public decimal TotalCatchKg { get; set; }
-        }
+            if (ticket == null)
+                return Json(new { found = false });
 
-        public sealed class CarbonFootprintRow
-        {
-            public int ShipId { get; set; }
-            public string InternationalNumber { get; set; } = string.Empty;
-            public string FuelType { get; set; } = string.Empty;
-            public decimal? TotalHours { get; set; }
-            public decimal AverageFuelConsumptionPerHour { get; set; }
-            public decimal? TotalCatchKg { get; set; }
-            public decimal? FuelPerKgCatch { get; set; }
+            return Json(new { found = true, ticket });
         }
     }
 }
