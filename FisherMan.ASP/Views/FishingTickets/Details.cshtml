@@ -1,0 +1,105 @@
+@model FisherMan.ASP.Models.Domain.FishingTicket
+
+@{
+    ViewData["Title"] = "Детайли за билет";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">Данни за притежателя</div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Три имена</dt>
+                    <dd class="col-sm-7"><strong>@Model.HolderName</strong></dd>
+                    <dt class="col-sm-5">ЕГН</dt>
+                    <dd class="col-sm-7">@Model.HolderEGN</dd>
+                    <dt class="col-sm-5">Дата на раждане</dt>
+                    <dd class="col-sm-7">@Model.BirthDate.ToString("dd.MM.yyyy")</dd>
+                    <dt class="col-sm-5">Категория</dt>
+                    <dd class="col-sm-7">
+                        @if (Model.IsDisabled) { <span class="badge bg-info">Инвалид</span> }
+                        else if (Model.IsPensioner) { <span class="badge bg-secondary">Пенсионер</span> }
+                        else if (Model.IsUnder14) { <span class="badge bg-warning text-dark">До 14г.</span> }
+                        else { <span class="badge bg-light text-dark border">Стандарт</span> }
+                    </dd>
+                    @if (Model.IsDisabled && !string.IsNullOrEmpty(Model.DisabilityDecisionNumber))
+                    {
+                        <dt class="col-sm-5">Решение ТЕЛК</dt>
+                        <dd class="col-sm-7">@Model.DisabilityDecisionNumber</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header bg-secondary text-white">Данни за билета</div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Тип</dt>
+                    <dd class="col-sm-7">@Model.ValidityType.GetDisplayName()</dd>
+                    <dt class="col-sm-5">Издаден</dt>
+                    <dd class="col-sm-7">@Model.IssueDate.ToString("dd.MM.yyyy")</dd>
+                    <dt class="col-sm-5">Изтича</dt>
+                    <dd class="col-sm-7">@Model.ExpiryDate.ToString("dd.MM.yyyy")</dd>
+                    <dt class="col-sm-5">Цена</dt>
+                    <dd class="col-sm-7">@Model.Price.ToString("F2") лв.</dd>
+                    <dt class="col-sm-5">Статус</dt>
+                    <dd class="col-sm-7">
+                        @if (Model.IsValid)
+                        {
+                            <span class="badge bg-success">Валиден</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Изтекъл</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Регистриран улов (@Model.Catches.Count записа)</h4>
+<table class="table table-sm table-bordered">
+    <thead class="table-light">
+        <tr>
+            <th>Дата</th>
+            <th>Вид риба</th>
+            <th>Тегло (кг)</th>
+            <th>Локация</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model.Catches.OrderByDescending(c => c.CatchDate))
+        {
+            <tr>
+                <td>@c.CatchDate.ToString("dd.MM.yyyy")</td>
+                <td>@c.FishType</td>
+                <td>@c.WeightKg.ToString("F2")</td>
+                <td>@c.Location</td>
+            </tr>
+        }
+        @if (!Model.Catches.Any())
+        {
+            <tr><td colspan="4" class="text-center text-muted">Няма регистриран улов.</td></tr>
+        }
+    </tbody>
+    @if (Model.Catches.Any())
+    {
+        <tfoot>
+            <tr class="table-info">
+                <td colspan="2"><strong>Общо</strong></td>
+                <td><strong>@Model.Catches.Sum(c => c.WeightKg).ToString("F2") кг</strong></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    }
+</table>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Редакция</a>
+    <a asp-action="Index" class="btn btn-secondary">Обратно</a>
+</div>
