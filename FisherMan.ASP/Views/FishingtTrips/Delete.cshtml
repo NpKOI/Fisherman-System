@@ -1,0 +1,29 @@
+@model FisherMan.ASP.Models.Domain.FishingTrip
+
+@{
+    ViewData["Title"] = "Изтриване на риболовен излет";
+}
+
+<h2 class="text-danger">@ViewData["Title"]</h2>
+<p>Сигурни ли сте, че искате да изтриете следния излет?</p>
+
+<div class="card col-md-6 mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-4">Кораб</dt>
+            <dd class="col-sm-8">@Model.Permit?.Ship?.Marking</dd>
+            <dt class="col-sm-4">Начало</dt>
+            <dd class="col-sm-8">@Model.StartDate.ToString("dd.MM.yyyy HH:mm")</dd>
+            <dt class="col-sm-4">Локация</dt>
+            <dd class="col-sm-8">@Model.StartLocation</dd>
+            <dt class="col-sm-4">Улов</dt>
+            <dd class="col-sm-8">@Model.TotalCatchKg.ToString("F1") кг</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="submit" value="Изтриване" class="btn btn-danger" />
+    <a asp-action="Index" class="btn btn-secondary">Отказ</a>
+</form>
