@@ -1,0 +1,61 @@
+@model FisherMan.ASP.Models.Domain.FishingPermit
+
+@{
+    ViewData["Title"] = "Добавяне на разрешително";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="ShipId" class="form-label"></label>
+                <select asp-for="ShipId" class="form-select" asp-items="ViewBag.ShipId">
+                    <option value="">-- Изберете кораб --</option>
+                </select>
+                <span asp-validation-for="ShipId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CaptainName" class="form-label"></label>
+                <input asp-for="CaptainName" class="form-control" />
+                <span asp-validation-for="CaptainName" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="IssueDate" class="form-label"></label>
+                    <input asp-for="IssueDate" class="form-control" type="date" />
+                    <span asp-validation-for="IssueDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ExpiryDate" class="form-label"></label>
+                    <input asp-for="ExpiryDate" class="form-control" type="date" />
+                    <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="FishingTools" class="form-label"></label>
+                <textarea asp-for="FishingTools" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="FishingTools" class="text-danger"></span>
+            </div>
+            <div class="mb-3 form-check">
+                <input asp-for="IsRevoked" class="form-check-input" />
+                <label asp-for="IsRevoked" class="form-check-label"></label>
+            </div>
+            <div class="mb-3">
+                <label asp-for="RevokedDate" class="form-label"></label>
+                <input asp-for="RevokedDate" class="form-control" type="date" />
+                <span asp-validation-for="RevokedDate" class="text-danger"></span>
+            </div>
+            <div class="mt-3">
+                <input type="submit" value="Добавяне" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Отказ</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

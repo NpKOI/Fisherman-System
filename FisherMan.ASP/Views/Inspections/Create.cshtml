@@ -1,0 +1,66 @@
+@model FisherMan.ASP.Models.Domain.Inspection
+@using FisherMan.ASP.Models.Domain
+
+@{
+    ViewData["Title"] = "Добавяне на инспекция";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="InspectorId" class="form-label">Инспектор</label>
+                <select asp-for="InspectorId" class="form-select" asp-items="ViewBag.InspectorId">
+                    <option value="">-- Изберете инспектор --</option>
+                </select>
+                <span asp-validation-for="InspectorId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="InspectionDate" class="form-label"></label>
+                <input asp-for="InspectionDate" class="form-control" type="datetime-local" />
+                <span asp-validation-for="InspectionDate" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Type" class="form-label"></label>
+                <select asp-for="Type" class="form-select"
+                    asp-items="Html.GetEnumSelectList<InspectionType>()"></select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="InspectedObject" class="form-label"></label>
+                <input asp-for="InspectedObject" class="form-control" />
+                <span asp-validation-for="InspectedObject" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label"></label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+            <div class="mb-3 form-check">
+                <input asp-for="HasViolation" class="form-check-input" />
+                <label asp-for="HasViolation" class="form-check-label"></label>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ActNumber" class="form-label"></label>
+                <input asp-for="ActNumber" class="form-control" />
+                <span asp-validation-for="ActNumber" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="FineAmount" class="form-label"></label>
+                <input asp-for="FineAmount" class="form-control" />
+                <span asp-validation-for="FineAmount" class="text-danger"></span>
+            </div>
+            <div class="mt-3">
+                <input type="submit" value="Добавяне" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Отказ</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

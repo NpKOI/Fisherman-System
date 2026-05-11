@@ -1,0 +1,78 @@
+@model FisherMan.ASP.Models.Domain.FishingPermit
+
+@{
+    ViewData["Title"] = "Детайли за разрешително";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">Данни за разрешителното</div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Кораб</dt>
+                    <dd class="col-sm-7"><a asp-controller="Ships" asp-action="Details" asp-route-id="@Model.Ship?.Id">@Model.Ship?.Marking</a> (@Model.Ship?.OwnerName)</dd>
+                    <dt class="col-sm-5">Капитан</dt>
+                    <dd class="col-sm-7">@Model.CaptainName</dd>
+                    <dt class="col-sm-5">Дата на издаване</dt>
+                    <dd class="col-sm-7">@Model.IssueDate.ToString("dd.MM.yyyy")</dd>
+                    <dt class="col-sm-5">Дата на изтичане</dt>
+                    <dd class="col-sm-7">@Model.ExpiryDate.ToString("dd.MM.yyyy")</dd>
+                    <dt class="col-sm-5">Уреди</dt>
+                    <dd class="col-sm-7">@Model.FishingTools</dd>
+                    <dt class="col-sm-5">Статус</dt>
+                    <dd class="col-sm-7">
+                        @if (Model.IsRevoked)
+                        {
+                            <span class="badge bg-danger">Отнето (@Model.RevokedDate?.ToString("dd.MM.yyyy"))</span>
+                        }
+                        else if (Model.ExpiryDate < DateTime.Today)
+                        {
+                            <span class="badge bg-warning text-dark">Изтекло</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Активно</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Риболовни излети (@Model.FishingTrips.Count)</h4>
+<table class="table table-sm table-bordered">
+    <thead class="table-light">
+        <tr>
+            <th>Начало</th>
+            <th>Край</th>
+            <th>Локация</th>
+            <th>Уреди</th>
+            <th>Улов (кг)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var trip in Model.FishingTrips.OrderByDescending(t => t.StartDate))
+        {
+            <tr>
+                <td>@trip.StartDate.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>@(trip.EndDate?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                <td>@trip.StartLocation</td>
+                <td>@trip.FishingTools</td>
+                <td>@trip.TotalCatchKg.ToString("F1")</td>
+            </tr>
+        }
+        @if (!Model.FishingTrips.Any())
+        {
+            <tr><td colspan="5" class="text-center text-muted">Няма регистрирани излети.</td></tr>
+        }
+    </tbody>
+</table>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Редакция</a>
+    <a asp-action="Index" class="btn btn-secondary">Обратно</a>
+</div>

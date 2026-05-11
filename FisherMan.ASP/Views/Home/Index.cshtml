@@ -1,8 +1,78 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Начало";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="px-4 py-5 text-center bg-primary text-white rounded mb-5">
+    <h1 class="display-5 fw-bold">🐟 ИАРА</h1>
+    <p class="col-lg-8 mx-auto lead">
+        Информационна система на Изпълнителна Агенция по Рибарство и Аквакултури
+    </p>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white">🚢 Регистри</div>
+            <div class="card-body">
+                <p class="card-text">Управление на риболовни кораби, разрешителни за риболов и риболовни дневници.</p>
+                <div class="d-grid gap-2">
+                    <a asp-controller="Ships" asp-action="Index" class="btn btn-outline-primary btn-sm">Кораби</a>
+                    <a asp-controller="Permits" asp-action="Index" class="btn btn-outline-primary btn-sm">Разрешителни</a>
+                    <a asp-controller="FishingTrips" asp-action="Index" class="btn btn-outline-primary btn-sm">Риболовни излети</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white">🎫 Любителски риболов</div>
+            <div class="card-body">
+                <p class="card-text">Издаване и управление на билети за любителски риболов за граждани.</p>
+                <div class="d-grid gap-2">
+                    <a asp-controller="FishingTickets" asp-action="Index" class="btn btn-outline-success btn-sm">Билети</a>
+                    <a asp-controller="FishingTickets" asp-action="Create" class="btn btn-success btn-sm">+ Нов билет</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-warning">
+            <div class="card-header bg-warning text-dark">🔍 Инспекции</div>
+            <div class="card-body">
+                <p class="card-text">Управление на инспектори и регистриране на извършени проверки и нарушения.</p>
+                <div class="d-grid gap-2">
+                    <a asp-controller="Inspectors" asp-action="Index" class="btn btn-outline-warning btn-sm">Инспектори</a>
+                    <a asp-controller="Inspections" asp-action="Index" class="btn btn-outline-warning btn-sm">Инспекции</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-info">
+    <div class="card-header bg-info text-white">📊 Справки и анализи</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-2">
+                <a asp-controller="Reports" asp-action="Report1" class="btn btn-outline-warning w-100">
+                    Справка 1<br/><small>Изтичащи разрешителни</small>
+                </a>
+            </div>
+            <div class="col-md-3 mb-2">
+                <a asp-controller="Reports" asp-action="Report2" class="btn btn-outline-info w-100">
+                    Справка 2<br/><small>Класация любители</small>
+                </a>
+            </div>
+            <div class="col-md-3 mb-2">
+                <a asp-controller="Reports" asp-action="Report3" class="btn btn-outline-primary w-100">
+                    Справка 3<br/><small>Статистика кораби</small>
+                </a>
+            </div>
+            <div class="col-md-3 mb-2">
+                <a asp-controller="Reports" asp-action="Report4" class="btn btn-outline-success w-100">
+                    Справка 4<br/><small>Въглероден отпечатък</small>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
