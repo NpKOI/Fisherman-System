@@ -1,4 +1,5 @@
-﻿using FisherMan.ASP.Data;
+using FisherMan.ASP.Models;
+using FisherMan.ASP.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;

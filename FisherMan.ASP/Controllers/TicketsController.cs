@@ -1,5 +1,7 @@
-﻿using FisherMan.ASP.Data;
+using FisherMan.ASP.Models;
+using FisherMan.ASP.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FisherMan.ASP.Controllers
 {

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using FisherMan.ASP.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FisherMan.ASP.Data
 {
