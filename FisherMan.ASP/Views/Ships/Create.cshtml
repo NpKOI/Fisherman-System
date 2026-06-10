@@ -1,0 +1,107 @@
+@model FisherMan.ASP.Models.Domain.Ship
+
+@{
+    ViewData["Title"] = "Добавяне на кораб";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <h5 class="mt-2 mb-3 border-bottom pb-1">Идентификационни данни</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="InternationalNumber" class="form-label"></label>
+                    <input asp-for="InternationalNumber" class="form-control" />
+                    <span asp-validation-for="InternationalNumber" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CallSign" class="form-label"></label>
+                    <input asp-for="CallSign" class="form-control" />
+                    <span asp-validation-for="CallSign" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Marking" class="form-label"></label>
+                    <input asp-for="Marking" class="form-control" />
+                    <span asp-validation-for="Marking" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="OwnerName" class="form-label"></label>
+                    <input asp-for="OwnerName" class="form-control" />
+                    <span asp-validation-for="OwnerName" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="OwnerEGN" class="form-label"></label>
+                    <input asp-for="OwnerEGN" class="form-control" />
+                    <span asp-validation-for="OwnerEGN" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CaptainName" class="form-label"></label>
+                <input asp-for="CaptainName" class="form-control" />
+                <span asp-validation-for="CaptainName" class="text-danger"></span>
+            </div>
+
+            <h5 class="mt-3 mb-3 border-bottom pb-1">Технически параметри</h5>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Length" class="form-label"></label>
+                    <input asp-for="Length" class="form-control" />
+                    <span asp-validation-for="Length" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Width" class="form-label"></label>
+                    <input asp-for="Width" class="form-control" />
+                    <span asp-validation-for="Width" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Tonnage" class="form-label"></label>
+                    <input asp-for="Tonnage" class="form-control" />
+                    <span asp-validation-for="Tonnage" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Draft" class="form-label"></label>
+                    <input asp-for="Draft" class="form-control" />
+                    <span asp-validation-for="Draft" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="EnginePower" class="form-label"></label>
+                    <input asp-for="EnginePower" class="form-control" />
+                    <span asp-validation-for="EnginePower" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="EngineType" class="form-label"></label>
+                    <input asp-for="EngineType" class="form-control" placeholder="напр. Дизелов" />
+                    <span asp-validation-for="EngineType" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="FuelType" class="form-label"></label>
+                    <input asp-for="FuelType" class="form-control" placeholder="напр. Дизел" />
+                    <span asp-validation-for="FuelType" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="FuelConsumptionPerHour" class="form-label"></label>
+                    <input asp-for="FuelConsumptionPerHour" class="form-control" />
+                    <span asp-validation-for="FuelConsumptionPerHour" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <input type="submit" value="Добавяне" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Отказ</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
